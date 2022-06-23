@@ -1,10 +1,17 @@
-const {Router} = require("express");
-const res = require("express/lib/response");
+const express = require('express');
+const router = express.Router();
+const authController = require('../../controllers/authController')
 
-const route = Router();
+router.post('/signup',authController.signup)
+router.post('/login',authController.login)
+router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
 
-route.get('/',(req,res)=>{
-    res.send("dekha beta")
-})
+router.patch(
+    '/updateMyPassword',
+    authController.protect,
+    authController.updatePassword
+  );
 
-module.exports = route;
+
+module.exports = router;
