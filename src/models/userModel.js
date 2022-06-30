@@ -48,16 +48,6 @@ userSchema.methods.updateLastLogin = async function(){
     this.lastLogin = Date.now();
     await this.save();
 }
-// userSchema.methods.getAuthToken = async function(){
-//     let params = {
-//         id: this._id,
-//         role: this.role
-//     }
-//     let tokenVal = jwt.sign(params, process.env.SECRET)
-//     this.tokens = this.tokens.concat({token:tokenVal})
-//     await this.save()
-//     return tokenVal;
-// }
 
 userSchema.methods.correctPassword = async function(
     candidatePassword,
@@ -87,9 +77,6 @@ userSchema.methods.correctPassword = async function(
       .createHash('sha256')
       .update(resetToken)
       .digest('hex');
-  
-    //console.log({ resetToken }, this.passwordResetToken);
-  
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   
     return resetToken;
