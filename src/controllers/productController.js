@@ -1,5 +1,5 @@
-const Product = require('./../models/productModel');
 const catchAsync = require('./../utils/catchAsync')
+const productService = require('./../services/product.service')
 
 exports.addProduct = catchAsync(async(req,res,next)=>{
     //res.status(200).json({file:req.files,body:req.body})
@@ -10,7 +10,7 @@ exports.addProduct = catchAsync(async(req,res,next)=>{
             return {img:file.filename}
         })
     }
-    const product = await Product.create({
+    const product = await productService.createProduct({
         name,qty,price,productPictures,category,createdBy:req.user._id
     })
 
@@ -21,7 +21,7 @@ exports.addProduct = catchAsync(async(req,res,next)=>{
 })
 // get All Products
 exports.getAllProducts = catchAsync(async(req,res,next)=>{
-    const products = await Product.find()
+    const products = await productService.getAllProduct();
     res.status(200).json({
         message:"Success",
         data:{

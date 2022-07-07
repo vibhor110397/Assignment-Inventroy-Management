@@ -1,10 +1,9 @@
-const invoiceDetail = require('./../models/invoiceDetailModel')
-const Product = require('./../models/productModel')
-const Invoice = require('./../models/invoiceModel')
 const catchAsync = require('./../utils/catchAsync')
 const ShortUniqueId = require('short-unique-id')
-const User = require('../models/userModel')
 const uid = new ShortUniqueId({ length: 10 });
+const orderService = require('./../services')
+const productService = require('./../services')
+const userService = require('./../services')
 
 
 // generate unique invoice number
@@ -17,19 +16,19 @@ const storeDetailsAndUpdateDetails = async(items,invoiceNo,sub_total)=>{
         return (async () => {
             const { p_name,p_qty } = item
         // find the prodcut with the help of itemname
-        const actualProduct = await Product.find({name:p_name})
+        const actualProduct = await productService.getProductbyName(p_name)
 
         //get the actualPrice of prodcut
         const p_price = actualProduct[0].price  
         //save the data in inoicedetails DB   data : invoiceNo , p_Name , p_QTY,p_Price
-        await invoiceDetail.create({
+        await orderService.storeDetailsOfInvoice({
             invoiceNo,
             p_name,
             p_qty,
             p_price
         })
         const updateQty = actualProduct[0].qty - p_qty
-        await Product.findByIdAndUpdate({_id:actualProduct[0]._id},{qty:updateQty})
+        await productService.updateProduct(actualProduct[0]._id,updateQty)
         sub_total += (parseInt(p_price)*parseInt(p_qty))
         })()    
     })
@@ -42,7 +41,7 @@ const generateInvoice = async(sub_t,paidAmt,invoiceNo,custName)=>{
     const netTotal = sub_t + gst;
     const orderDate = Date.now();
     const due = netTotal - paidAmt;
-    await Invoice.create({
+    await orderService.generateInvoice({
         invoiceNo,custName,orderDate,subtotal:sub_t,gst,netTotal,paidAmt,due
     })
 }
@@ -56,8 +55,7 @@ exports.placeOrder = catchAsync(async(req,res,next)=>{
     // 3.) storeDetailsAndUpdateDetails and get subtotal
     const sub_t = await storeDetailsAndUpdateDetails(items,invoiceNo,0)
     // 4.) retreive username from the usertable
-    const user = await User.findById({_id:req.user.id})
-    console.log(user.name);
+    const user = await userService.getUserById(req.user.id)
     // 5.) generate the invoice of orders
     await generateInvoice(sub_t,req.body.paidAmt,invoiceNo,user.name)
     

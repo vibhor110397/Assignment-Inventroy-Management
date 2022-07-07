@@ -1,10 +1,12 @@
 const express = require('express');
-const dotenv = require('dotenv');
 const mongoose = require('mongoose')
 const AppError = require('./utils/appError')
 const globalErrorHandler = require('./controllers/errorController')
 
+const dotenv = require('dotenv');
 dotenv.config('.env')
+
+const config = require('./config/config')
 const app = express();
 
 app.use(express.json())
@@ -13,7 +15,7 @@ app.use(express.urlencoded({extended:true}))
 
 
 
-const db = process.env.DB_URL.replace('<password>',process.env.DB_PASS)
+const db = config.db.url.replace('<password>',config.db.pass)
 
 mongoose.connect(db).then(() =>{
     // console.log(con.connections);
